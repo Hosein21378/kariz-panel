@@ -34,6 +34,7 @@ start_unit() {
   command -v systemctl >/dev/null || return 0
   systemctl daemon-reload
   systemctl enable --now "$1"
+  systemctl restart "$1"   # re-install must reload replaced files into the live process
 }
 
 mkdir -p "$PREFIX" "$STATE" "$SYSTEMD"
@@ -68,14 +69,19 @@ fi
 
 command -v "$PY" >/dev/null || { echo "$PY not found" >&2; exit 1; }
 get_file panel.py "$PREFIX/panel.py"
-PASS="${KARIZ_PASS:-$($PY -c 'import secrets;print(secrets.token_hex(8))')}"
-cat > "$STATE/panel.env" <<EOF
+if [ -f "$STATE/panel.env" ]; then
+  . "$STATE/panel.env"          # re-install: keep existing credentials
+  PASS="$KARIZ_PANEL_PASS"
+else
+  PASS="${KARIZ_PASS:-$($PY -c 'import secrets;print(secrets.token_hex(8))')}"
+  cat > "$STATE/panel.env" <<EOF
 KARIZ_PANEL_DB=$STATE/panel.db
 KARIZ_PANEL_PORT=$PORT
 KARIZ_PANEL_USER=$ADMIN_USER
 KARIZ_PANEL_PASS=$PASS
 EOF
-chmod 600 "$STATE/panel.env"
+  chmod 600 "$STATE/panel.env"
+fi
 cat > "$SYSTEMD/kariz-panel.service" <<EOF
 [Unit]
 Description=Kariz control panel

@@ -67,17 +67,27 @@ def configs_for(c, sid):
 
 
 INDEX = r"""<!doctype html><html><head><meta charset=utf-8><title>Kariz panel</title>
-<style>body{font:14px system-ui;background:#111;color:#ddd;max-width:960px;margin:30px auto}
-input,select,button{font:14px system-ui;padding:6px;margin:3px;background:#222;color:#ddd;border:1px solid #444}
-button{cursor:pointer}pre{background:#000;padding:10px;overflow:auto;border:1px solid #333}
-.card{border:1px solid #333;padding:12px;margin:10px 0}.del{color:#f77}h2{border-bottom:1px solid #333}</style>
+<style>
+body{font-family:system-ui,-apple-system,sans-serif;background:#0d0d0d;color:#e0e0e0;max-width:800px;margin:40px auto;line-height:1.5}
+input,select,button{font:14px system-ui;padding:8px;margin:4px;background:#1a1a1a;color:#eee;border:1px solid #333;border-radius:4px}
+button{cursor:pointer;background:#252525;transition:background 0.2s}
+button:hover{background:#333}
+pre{background:#050505;padding:15px;overflow:auto;border-radius:6px;border:1px solid #222}
+.card{border:1px solid #222;padding:16px;margin:12px 0;border-radius:8px;background:#121212;transition:transform 0.2s, box-shadow 0.2s}
+.card:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,0.3);border-color:#444}
+.del{color:#f55;cursor:pointer;margin-left:8px;font-weight:bold}
+h1,h2{font-weight:600}
+h2{border-bottom:1px solid #333;padding-bottom:8px;margin-top:30px}
+</style>
 </head><body><h1>Kariz panel</h1>
 <h2>Servers</h2><div id=servers></div>
-<div><input id=sname placeholder="server name"><input id=saddr placeholder="address (optional)">
+<div class=card>
+<input id=sname placeholder="server name"><input id=saddr placeholder="address (optional)">
 <button onclick=addServer()>Add server</button></div>
 <h2>Tunnels</h2><div id=tunnels></div>
-<div class=card><input id=tname placeholder="tunnel name">
-entry <select id=tentry></select> exit <select id=texit></select>
+<div class=card>
+<input id=tname placeholder="tunnel name"><br>
+entry <select id=tentry></select> exit <select id=texit></select><br>
 port <input id=tport type=number value=3080> transport <select id=ttrans>
 <option>auto</option><option>tcp</option><option>tcpmux</option><option>ws</option>
 <option>wss</option><option>quic</option><option>kcp</option></select>

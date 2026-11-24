@@ -35,6 +35,37 @@ def req(path, method="GET", data=None, auth=False):
         return e.code, e.read()
 
 
+def check_update():
+    """Self-update path: local mock CDN, temp copy of panel, no service touched."""
+    import functools
+    import http.server
+    import shutil
+    import threading
+    remote = os.path.join(tmp, "remote")
+    local = os.path.join(tmp, "local")
+    os.makedirs(remote)
+    os.makedirs(local)
+    names = ("panel.py", "install.sh", "agent.py")
+    for f in names:
+        with open(os.path.join(remote, f), "w") as fh:
+            fh.write("# REMOTE " + f + "\n")
+    handler = functools.partial(http.server.SimpleHTTPRequestHandler, directory=remote)
+    srv = http.server.ThreadingHTTPServer(("127.0.0.1", 0), handler)
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    try:
+        shutil.copy("/root/kariz-panel/panel.py", os.path.join(local, "panel.py"))
+        code = ("import sys; sys.path.insert(0,%r); "
+                "import panel; print(','.join(panel.update_files()))" % local)
+        e2 = dict(os.environ, KARIZ_BASE="http://127.0.0.1:%d" % srv.server_port)
+        out = subprocess.check_output([sys.executable, "-c", code], env=e2, text=True).strip()
+        assert out == ",".join(names), out
+        for f in names:
+            with open(os.path.join(local, f)) as fh:
+                assert fh.read() == "# REMOTE " + f + "\n", f
+    finally:
+        srv.shutdown()
+
+
 try:
     for _ in range(50):
         try:
@@ -44,7 +75,7 @@ try:
             time.sleep(0.1)
 
     s, b = req("/", auth=True)
-    assert s == 200 and b"<h1>Kariz panel</h1>" in b, "UI failed"
+    assert s == 200 and b"<h1>Kariz panel" in b, "UI failed"
 
     s, _ = req("/api/servers")
     assert s == 401, f"auth gate failed: {s}"
@@ -88,7 +119,9 @@ try:
     s, cfg = req("/api/agent/config?" + q)
     assert len(cfg) == 0, "delete did not propagate"
 
-    print("PASS: UI, auth, add-server, add-tunnel, forward ports, entry/exit TOML, bad-token, delete")
+    check_update()
+
+    print("PASS: UI, auth, add-server, add-tunnel, forward ports, entry/exit TOML, bad-token, delete, self-update")
     print("--- entry TOML sample ---")
     print(e["toml"])
 finally:

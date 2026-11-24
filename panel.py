@@ -8,6 +8,8 @@ import os
 import re
 import secrets
 import sqlite3
+import subprocess
+import urllib.request
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlparse, parse_qs
 
@@ -66,6 +68,23 @@ def configs_for(c, sid):
     return out
 
 
+def update_files():
+    """Download latest files next to the running panel.py. Returns files."""
+    base = os.environ.get("KARIZ_BASE", "https://cdn.jsdelivr.net/gh/Hosein21378/kariz-panel@main")
+    prefix = os.path.dirname(os.path.abspath(__file__))
+    got = []
+    for f in ("panel.py", "install.sh", "agent.py"):
+        data = urllib.request.urlopen(base + "/" + f, timeout=30).read()
+        if f == "panel.py":
+            compile(data, f, "exec")  # never replace running panel with broken syntax
+        tmp = os.path.join(prefix, f + ".new")
+        with open(tmp, "wb") as fh:
+            fh.write(data)
+        os.replace(tmp, os.path.join(prefix, f))
+        got.append(f)
+    return got
+
+
 INDEX = r"""<!doctype html><html><head><meta charset=utf-8><title>Kariz panel</title>
 <style>
 body{font-family:system-ui,-apple-system,sans-serif;background:#0d0d0d;color:#e0e0e0;max-width:800px;margin:40px auto;line-height:1.5}
@@ -79,7 +98,7 @@ pre{background:#050505;padding:15px;overflow:auto;border-radius:6px;border:1px s
 h1,h2{font-weight:600}
 h2{border-bottom:1px solid #333;padding-bottom:8px;margin-top:30px}
 </style>
-</head><body><h1>Kariz panel</h1>
+</head><body><h1>Kariz panel <button onclick=updatePanel() style="font-size:12px;vertical-align:middle">🔄 Update</button></h1>
 <h2>Servers</h2><div id=servers></div>
 <div class=card>
 <input id=sname placeholder="server name"><input id=saddr placeholder="address (optional)">
@@ -108,6 +127,7 @@ async function addTunnel(){let fw=[...q('#fw').children].map(d=>({listen:+d.quer
  await api('/api/tunnels','POST',{name:q('#tname').value||'tun',entry:+q('#tentry').value,exit:+q('#texit').value,tunnel_port:+q('#tport').value,transport:q('#ttrans').value,forwards:fw});load()}
 function addFw(){let d=document.createElement('div');d.innerHTML='<input class=l type=number placeholder=listen><input class=t type=number placeholder=target>';q('#fw').appendChild(d)}
 async function del(k,id){await api('/api/'+k+'/'+id,'DELETE');load()}
+async function updatePanel(){out('Updating from remote...');try{let r=await api('/api/update','POST');out('Updated: '+r.files.join(', ')+'. Service restarting...')}catch(e){out('Update failed: '+e.message)}}
 load()</script></body></html>"""
 
 
@@ -193,6 +213,17 @@ class H(BaseHTTPRequestHandler):
                           (b.get("address", ""), b.get("token", "")))
             c.commit()
             return self._json({"ok": r.rowcount > 0})
+        if u.path == "/api/update":
+            try:
+                files = update_files()
+            except Exception as e:
+                return self._json({"error": str(e)}, 500)
+            # Restart service after response is flushed.
+            subprocess.Popen(
+                ["sh", "-c", "sleep 1; systemctl restart kariz-panel"],
+                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                start_new_session=True)
+            return self._json({"ok": True, "files": files})
         if u.path == "/api/tunnels":
             name = str(b.get("name", ""))
             if not re.fullmatch(r"[a-z0-9-]+", name):

@@ -2,7 +2,7 @@
 # Kariz panel — one-line installer. Default: panel. With --join: agent.
 set -euo pipefail
 
-BASE="${KARIZ_BASE:-https://raw.githubusercontent.com/Hosein21378/kariz-panel/main}"
+BASE="${KARIZ_BASE:-https://cdn.jsdelivr.net/gh/Hosein21378/kariz-panel@main}"
 PREFIX="${KARIZ_PREFIX:-/opt/kariz-panel}"
 STATE="${KARIZ_STATE:-/var/lib/kariz-panel}"
 SYSTEMD="${KARIZ_SYSTEMD:-/etc/systemd/system}"

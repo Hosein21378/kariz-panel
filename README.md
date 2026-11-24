@@ -5,7 +5,7 @@
 ## نصب یک خط (روی ماشین پنل)
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Hosein21378/kariz-panel/main/install.sh | bash
+curl -fsSL https://cdn.jsdelivr.net/gh/Hosein21378/kariz-panel@main/install.sh | bash
 ```
 
 اسکریپت: `python3` چک میکند، `panel.py` میگیرند، سرویس `kariz-panel` را فعالمیکند،

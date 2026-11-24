@@ -93,7 +93,7 @@ async function load(){let [s,t]=await Promise.all([api('/api/servers'),api('/api
  let opts=s.map(x=>`<option value=${x.id}>${esc(x.name)}</option>`).join('');
  q('#tentry').innerHTML=opts;q('#texit').innerHTML=opts}
 async function addServer(){let b=await api('/api/servers','POST',{name:q('#sname').value||'server',address:q('#saddr').value});
- out('On target server, run this one line:\n\ncurl -fsSL https://raw.githubusercontent.com/Hosein21378/kariz-panel/main/install.sh | bash -s -- --join '+b.token+' --panel '+location.origin);load()}
+ out('On target server, run this one line:\n\ncurl -fsSL https://cdn.jsdelivr.net/gh/Hosein21378/kariz-panel@main/install.sh | bash -s -- --join '+b.token+' --panel '+location.origin);load()}
 async function addTunnel(){let fw=[...q('#fw').children].map(d=>({listen:+d.querySelector('.l').value,target:+d.querySelector('.t').value,protocol:'tcp'})).filter(x=>x.listen&&x.target);
  await api('/api/tunnels','POST',{name:q('#tname').value||'tun',entry:+q('#tentry').value,exit:+q('#texit').value,tunnel_port:+q('#tport').value,transport:q('#ttrans').value,forwards:fw});load()}
 function addFw(){let d=document.createElement('div');d.innerHTML='<input class=l type=number placeholder=listen><input class=t type=number placeholder=target>';q('#fw').appendChild(d)}

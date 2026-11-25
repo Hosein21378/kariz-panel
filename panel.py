@@ -384,8 +384,8 @@ class H(BaseHTTPRequestHandler):
             if ADMIN_USER and (not hmac.compare_digest(str(b.get("user", "")), ADMIN_USER) or
                                not hmac.compare_digest(str(b.get("pass", "")), ADMIN_PASS)):
                 return self._json({"error": "bad credentials"}, 401)
-            self.send_response(302)
-            self.send_header("Location", "/")
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
             self.send_header("Set-Cookie", COOKIE + "=" + make_session() +
                              "; Path=/; HttpOnly; SameSite=Lax; Max-Age=604800")
             self.send_header("Content-Length", "0")

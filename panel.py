@@ -2,8 +2,10 @@
 """Kariz control panel — stdlib only. Servers, tunnels, forward ports."""
 
 import base64
+import hashlib
 import hmac
 import json
+import time
 import os
 import re
 import secrets
@@ -143,6 +145,7 @@ pre{background:#080a0f;padding:14px;border-radius:10px;border:1px solid #202532;
 <div class=foot>
 <button class=upd onclick=updatePanel() title="بروزرسانی">🔄 <span class=lbl>بروزرسانی</span></button>
 <button onclick="q('#sidebar').classList.toggle('collapsed')" title="جمع کردن منو">☰ <span class=lbl>جمع کردن</span></button>
+<button onclick="fetch('/logout').then(()=>location.href='/login')" title="خروج">🚪 <span class=lbl>خروج</span></button>
 </div>
 </aside>
 <main>
@@ -202,6 +205,60 @@ async function del(k,id){await api('/api/'+k+'/'+id,'DELETE');load()}
 async function updatePanel(){out('Updating from remote...');try{let r=await api('/api/update','POST');out('Updated: '+r.files.join(', ')+'. Service restarting...')}catch(e){out('Update failed: '+e.message)}}
 load()</script></body></html>"""
 
+LOGIN = r"""<!doctype html><html lang=fa dir=rtl><head><meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<title>ورود — Kariz Panel</title>
+<style>
+*{box-sizing:border-box}
+:root{--bg:#0b0d12;--txt:#e8ecf4;--mut:#8b95a8;--line:rgba(255,255,255,.09);--acc:#5b74f5}
+body{margin:0;min-height:100vh;font-family:system-ui,-apple-system,'Segoe UI',sans-serif;color:var(--txt);background:radial-gradient(900px 520px at 12% 8%,rgba(91,116,245,.13),transparent 60%),radial-gradient(760px 520px at 88% 92%,rgba(124,143,255,.10),transparent 60%),#0b0d12;display:flex;align-items:center;justify-content:center;padding:20px}
+.wrap{width:100%;max-width:420px}
+.brand{text-align:center;margin-bottom:26px}
+.badge{width:58px;height:58px;margin:0 auto 14px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:27px;background:linear-gradient(145deg,#5b74f5,#7c8fff);box-shadow:0 12px 32px rgba(91,116,245,.35)}
+.brand h1{margin:0;font-size:22px;font-weight:700;letter-spacing:-.4px}
+.brand p{margin:6px 0 0;color:var(--mut);font-size:13px}
+.card{background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.015));border:1px solid var(--line);border-radius:16px;padding:28px;box-shadow:0 24px 64px rgba(0,0,0,.5)}
+.field{margin-bottom:16px}
+.field label{display:block;font-size:12px;color:var(--mut);margin-bottom:8px;font-weight:500}
+.inp{display:flex;align-items:center;gap:10px;background:#0b0e15;border:1px solid var(--line);border-radius:10px;padding:0 13px;transition:border-color .15s,box-shadow .15s}
+.inp:focus-within{border-color:var(--acc);box-shadow:0 0 0 3px rgba(91,116,245,.16)}
+.inp i{font-style:normal;color:#66708a;font-size:15px}
+.inp input{flex:1;min-width:0;background:none;border:0;outline:0;color:var(--txt);font:14px system-ui;padding:12px 0;direction:ltr;text-align:right}
+.inp input::placeholder{color:#59627a}
+.btn{width:100%;margin-top:8px;padding:13px;border:0;border-radius:10px;font:600 14px system-ui;color:#fff;cursor:pointer;background:linear-gradient(135deg,#5b74f5,#7085ff);box-shadow:0 8px 24px rgba(91,116,245,.3);transition:transform .15s,box-shadow .15s,filter .15s}
+.btn:hover{filter:brightness(1.1);box-shadow:0 12px 30px rgba(91,116,245,.45);transform:translateY(-2px)}
+.btn:active{transform:translateY(0)}
+.btn:disabled{opacity:.6;cursor:wait;transform:none}
+.err{color:#ff7b7b;font-size:12px;min-height:18px;margin-top:12px;text-align:center}
+.foot{text-align:center;color:#545d73;font-size:11px;margin-top:20px}
+@media(max-width:480px){.card{padding:22px}}
+</style></head><body>
+<div class=wrap>
+<div class=brand><div class=badge>🛡️</div><h1>Kariz Panel</h1><p>ورود امن به پنل کنترل</p></div>
+<div class=card>
+<div class=field><label for=u>نام کاربری</label><div class=inp><i>👤</i><input id=u autocomplete=username placeholder="username" dir=ltr></div></div>
+<div class=field><label for=p>رمز عبور</label><div class=inp><i>🔒</i><input id=p type=password autocomplete=current-password placeholder="••••••••" dir=ltr></div></div>
+<button class=btn id=b onclick=login()>ورود به پنل</button>
+<div class=err id=e></div>
+</div>
+<div class=foot>مدیریت تونل‌ها و سرورهای Kariz</div>
+</div>
+<script>
+const q=s=>document.querySelector(s);
+async function login(){
+ const b=q('b'),e=q('e');e.textContent='';
+ if(!q('u').value||!q('p').value){e.textContent='نام کاربری و رمز عبور را وارد کنید';return}
+ b.disabled=true;b.textContent='در حال ورود...';
+ try{
+  const r=await fetch('/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({user:q('u').value,pass:q('p').value})});
+  if(r.ok){location.href='/';return}
+  e.textContent=r.status===401?'نام کاربری یا رمز عبور نادرست است':'خطا در ورود';
+ }catch(x){e.textContent='اتصال برقرار نشد'}
+ b.disabled=false;b.textContent='ورود به پنل';
+}
+q('p').addEventListener('keydown',ev=>{if(ev.key==='Enter')login()});
+</script></body></html>"""
+
 
 def _authorized(handler):
     if not ADMIN_USER:
@@ -216,18 +273,54 @@ def _authorized(handler):
     return hmac.compare_digest(u, ADMIN_USER) and hmac.compare_digest(p, ADMIN_PASS)
 
 
+COOKIE = "kariz_session"
+
+
+def _cookie(handler, name):
+    for part in handler.headers.get("Cookie", "").split(";"):
+        k, _, v = part.strip().partition("=")
+        if k == name:
+            return v
+    return ""
+
+
+def make_session():
+    """Stateless 7-day session signed with the admin password."""
+    payload = ADMIN_USER + "|" + str(int(time.time()) + 604800)
+    sig = hmac.new(ADMIN_PASS.encode(), payload.encode(), hashlib.sha256).hexdigest()
+    return base64.urlsafe_b64encode((payload + "|" + sig).encode()).decode()
+
+
+def valid_session(handler):
+    if not ADMIN_USER:
+        return True
+    try:
+        payload, sig = base64.urlsafe_b64decode(
+            _cookie(handler, COOKIE).encode()).decode().rsplit("|", 1)
+        user, exp = payload.split("|", 1)
+        expect = hmac.new(ADMIN_PASS.encode(), payload.encode(), hashlib.sha256).hexdigest()
+        return (hmac.compare_digest(sig, expect) and
+                hmac.compare_digest(user, ADMIN_USER) and int(exp) > time.time())
+    except Exception:
+        return False
+
+
 class H(BaseHTTPRequestHandler):
     def log_message(self, *a):
         pass
 
     def _gate(self, path):
         # Agent endpoints carry their own secret (the join token).
-        if path.startswith("/api/agent/") or _authorized(self):
+        # Basic auth kept for API clients; browsers use the signed session cookie.
+        if path.startswith("/api/agent/") or _authorized(self) or valid_session(self):
             return True
-        self.send_response(401)
-        self.send_header("WWW-Authenticate", 'Basic realm="Kariz panel"')
-        self.send_header("Content-Length", "0")
-        self.end_headers()
+        if path.startswith("/api/"):
+            self._json({"error": "unauthorized"}, 401)
+        else:
+            self.send_response(302)
+            self.send_header("Location", "/login")
+            self.send_header("Content-Length", "0")
+            self.end_headers()
         return False
 
     def _send(self, code, body, ctype="application/json"):
@@ -247,6 +340,22 @@ class H(BaseHTTPRequestHandler):
 
     def do_GET(self):
         u = urlparse(self.path)
+        if u.path == "/login":
+            if valid_session(self):
+                self.send_response(302)
+                self.send_header("Location", "/")
+                self.send_header("Content-Length", "0")
+                self.end_headers()
+            else:
+                self._send(200, LOGIN, "text/html")
+            return
+        if u.path == "/logout":
+            self.send_response(302)
+            self.send_header("Location", "/login")
+            self.send_header("Set-Cookie", COOKIE + "=; Path=/; HttpOnly; Max-Age=0")
+            self.send_header("Content-Length", "0")
+            self.end_headers()
+            return
         if not self._gate(u.path):
             return
         q = parse_qs(u.query)
@@ -270,6 +379,18 @@ class H(BaseHTTPRequestHandler):
 
     def do_POST(self):
         u = urlparse(self.path)
+        if u.path == "/login":
+            b = self._body()
+            if ADMIN_USER and (not hmac.compare_digest(str(b.get("user", "")), ADMIN_USER) or
+                               not hmac.compare_digest(str(b.get("pass", "")), ADMIN_PASS)):
+                return self._json({"error": "bad credentials"}, 401)
+            self.send_response(302)
+            self.send_header("Location", "/")
+            self.send_header("Set-Cookie", COOKIE + "=" + make_session() +
+                             "; Path=/; HttpOnly; SameSite=Lax; Max-Age=604800")
+            self.send_header("Content-Length", "0")
+            self.end_headers()
+            return
         if not self._gate(u.path):
             return
         b = self._body()

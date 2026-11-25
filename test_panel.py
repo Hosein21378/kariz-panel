@@ -66,6 +66,40 @@ def check_update():
         srv.shutdown()
 
 
+def check_login():
+    """Custom login page + signed cookie session. Temp panel, no service touched."""
+    class NoRedirect(urllib.request.HTTPRedirectHandler):
+        def redirect_request(self, *a, **k):
+            return None
+    op = urllib.request.build_opener(NoRedirect)
+
+    def raw(path, method="GET", data=None, headers=None):
+        h = {"Content-Type": "application/json"}
+        h.update(headers or {})
+        body = json.dumps(data).encode() if data is not None else None
+        r = urllib.request.Request(BASE + path, data=body, headers=h, method=method)
+        try:
+            with op.open(r, timeout=5) as resp:
+                return resp.status, resp.read(), resp.headers
+        except urllib.error.HTTPError as e:
+            return e.code, e.read(), e.headers
+
+    s, _, h = raw("/")
+    assert s == 302 and h["Location"] == "/login", (s, h.get("Location"))
+    s, page, _ = raw("/login")
+    assert s == 200 and b"Kariz Panel" in page and b"id=p" in page, "login page failed"
+    s, _, _ = raw("/api/servers")
+    assert s == 401, s
+    s, _, _ = raw("/login", "POST", {"user": "admin", "pass": "wrong"})
+    assert s == 401, s
+    s, _, h = raw("/login", "POST", {"user": "admin", "pass": "secret123"})
+    assert s == 302, s
+    cookie = h["Set-Cookie"].split(";")[0]
+    s, body, _ = raw("/api/servers", headers={"Cookie": cookie})
+    assert s == 200 and isinstance(json.loads(body), list), (s, body)
+    print("PASS: login page, redirect gate, bad/good credentials, signed cookie")
+
+
 try:
     for _ in range(50):
         try:
@@ -119,6 +153,7 @@ try:
     s, cfg = req("/api/agent/config?" + q)
     assert len(cfg) == 0, "delete did not propagate"
 
+    check_login()
     check_update()
 
     print("PASS: UI, auth, add-server, add-tunnel, forward ports, entry/exit TOML, bad-token, delete, self-update")

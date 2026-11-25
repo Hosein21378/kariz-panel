@@ -93,59 +93,75 @@ INDEX = r"""<!doctype html><html lang=fa dir=rtl><head><meta charset=utf-8><titl
 *{box-sizing:border-box}
 body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:#0b0d12;color:#e2e8f0;margin:0;line-height:1.5}
 .app{display:flex;min-height:100vh}
-.sidebar{width:236px;flex:0 0 236px;background:#11141c;border-inline-start:1px solid #202532;display:flex;flex-direction:column;padding:16px 12px;transition:width .2s,flex-basis .2s;overflow:hidden}
+.sidebar{width:236px;flex:0 0 236px;background:#11141c;border-inline-end:1px solid #202532;display:flex;flex-direction:column;padding:16px 12px;transition:width .2s,flex-basis .2s;overflow:hidden}
 .sidebar.collapsed{width:64px;flex-basis:64px}
-.brand{display:flex;align-items:center;gap:10px;padding:4px 8px 18px;border-bottom:1px solid #202532;margin-bottom:14px;white-space:nowrap}
-.brand .logo{font-size:22px}
-.brand h1{font-size:16px;margin:0;font-weight:700;color:#fff}
-nav{display:flex;flex-direction:column;gap:4px;flex:1}
+.brand{display:flex;align-items:center;gap:10px;padding:4px 8px 18px;border-bottom:1px solid #202532;margin-bottom:14px;white-space:nowrap;overflow:hidden}
+.brand .logo{font-size:22px;flex-shrink:0}
+.brand h1{font-size:16px;margin:0;font-weight:700;color:#fff;transition:opacity .2s}
+nav{display:flex;flex-direction:column;gap:4px;flex:1;overflow-y:auto;overflow-x:hidden}
 nav a{padding:10px 12px;border-radius:8px;color:#9aa5bb;cursor:pointer;display:flex;align-items:center;gap:12px;font-size:14px;white-space:nowrap;transition:background .15s,color .15s}
+nav a i{font-style:normal;font-size:18px;width:24px;text-align:center;flex-shrink:0}
 nav a:hover{background:#1a1f2c;color:#e2e8f0}
 nav a.active{background:#1d2440;color:#8fa6ff}
-.foot{margin-top:auto;display:flex;flex-direction:column;gap:8px}
-button{font:13px system-ui;padding:9px 12px;background:#1e2433;color:#e2e8f0;border:1px solid #2b3245;border-radius:8px;cursor:pointer;transition:background .15s,transform .15s}
+.foot{margin-top:auto;display:flex;flex-direction:column;gap:8px;padding-top:12px;border-top:1px solid #202532}
+button{font:13px system-ui;padding:9px 12px;background:#1e2433;color:#e2e8f0;border:1px solid #2b3245;border-radius:8px;cursor:pointer;transition:background .15s,transform .15s;display:flex;align-items:center;justify-content:center;gap:8px}
 button:hover{background:#2a3247}
 button:active{transform:scale(.98)}
 .btn-accent{background:#4f6ef7;border-color:#4f6ef7;color:#fff}
 .btn-accent:hover{background:#3d59dd}
 .upd{display:flex;align-items:center;gap:8px}
 .sidebar.collapsed .brand h1,.sidebar.collapsed nav a span,.sidebar.collapsed .lbl{display:none}
-main{flex:1;min-width:0}
-.topbar{height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 28px;border-bottom:1px solid #202532;background:#0e1118}
+main{flex:1;min-width:0;display:flex;flex-direction:column;background:#0b0d12}
+.topbar{height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;border-bottom:1px solid #202532;background:#0e1118;flex-shrink:0}
 .topbar h2{margin:0;font-size:18px;font-weight:600}
 .hint{color:#6b7690;font-size:12px}
-.content{padding:24px 28px;max-width:1100px}
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:24px}
-.stat{background:#151924;border:1px solid #232a3a;border-radius:12px;padding:18px;transition:transform .2s,box-shadow .2s,border-color .2s}
-.stat:hover{transform:translateY(-3px);box-shadow:0 8px 20px rgba(0,0,0,.35);border-color:#3a4a6b}
-.stat .v{font-size:28px;font-weight:700;color:#8fa6ff}
-.stat .l{color:#8b95a8;font-size:13px;margin-top:4px}
-.view{display:none}
+.content{padding:24px;flex:1;overflow-y:auto}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-bottom:24px}
+.stat{background:#151924;border:1px solid #232a3a;border-radius:12px;padding:20px;transition:transform .2s,box-shadow .2s,border-color .2s}
+.stat:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.4);border-color:#3a4a6b}
+.stat .v{font-size:32px;font-weight:700;color:#8fa6ff;line-height:1}
+.stat .l{color:#8b95a8;font-size:13px;margin-top:8px}
+.view{display:none;animation:viewIn .35s ease-out}
 .section{background:#12161f;border:1px solid #232a3a;border-radius:12px;padding:20px;margin-bottom:20px}
-.section h3{margin:0 0 14px;font-size:15px;font-weight:600}
-.card{background:#171c28;border:1px solid #262d3e;border-radius:10px;padding:14px;margin:10px 0;transition:transform .2s,box-shadow .2s,border-color .2s}
+.section h3{margin:0 0 16px;font-size:15px;font-weight:600;display:flex;align-items:center;gap:8px}
+.card{background:#171c28;border:1px solid #262d3e;border-radius:10px;padding:16px;margin:12px 0;transition:transform .2s,box-shadow .2s,border-color .2s}
 .card:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,0,0,.35);border-color:#3a4a6b}
 .muted{color:#8b95a8;font-size:12px}
-.del{color:#ff6b6b;cursor:pointer;font-weight:bold;margin-inline-end:8px}
-.token{font-family:ui-monospace,monospace;font-size:11px;color:#7f8aa3;word-break:break-all;direction:ltr;display:inline-block}
-input,select{font:13px system-ui;padding:9px 10px;background:#0e1118;color:#e2e8f0;border:1px solid #2b3245;border-radius:8px;margin:4px 4px 4px 0}
-input:focus,select:focus{outline:none;border-color:#4f6ef7}
-.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px}
-pre{background:#080a0f;padding:14px;border-radius:10px;border:1px solid #202532;overflow:auto;font-size:12px;max-height:220px;color:#9fe0a0;direction:ltr;text-align:left}
-.empty{color:#6b7690;font-size:13px;padding:8px 0}
-@media(max-width:720px){.sidebar{width:64px;flex-basis:64px}.brand h1,nav a span,.lbl{display:none}.content{padding:16px}}
+.del{color:#ff6b6b;cursor:pointer;font-weight:bold;margin-inline-end:10px;float:left}
+.token{font-family:ui-monospace,monospace;font-size:11px;color:#7f8aa3;word-break:break-all;direction:ltr;display:inline-block;background:rgba(0,0,0,.2);padding:4px 8px;border-radius:4px;margin-top:8px}
+input,select{font:13px system-ui;padding:9px 12px;background:#0e1118;color:#e2e8f0;border:1px solid #2b3245;border-radius:8px;margin:4px}
+input:focus,select:focus{outline:none;border-color:#4f6ef7;box-shadow:0 0 0 2px rgba(79,110,247,0.2)}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:12px}
+pre{background:#080a0f;padding:16px;border-radius:10px;border:1px solid #202532;overflow:auto;font-size:12px;max-height:300px;color:#9fe0a0;direction:ltr;text-align:left;margin-top:20px}
+.empty{color:#6b7690;font-size:13px;padding:12px;text-align:center;background:rgba(255,255,255,0.02);border-radius:8px;border:1px dashed #232a3a}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+@keyframes slideIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:none}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes viewIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.sidebar{animation:slideIn .6s cubic-bezier(.16,1,.3,1) backwards}
+.topbar{animation:fadeUp .6s ease-out .1s backwards}
+.stat{animation:fadeUp .6s ease-out backwards}
+.stat:nth-child(1){animation-delay:.15s}
+.stat:nth-child(2){animation-delay:.25s}
+.stat:nth-child(3){animation-delay:.35s}
+.section{animation:fadeUp .6s ease-out backwards}
+.section:nth-of-type(1){animation-delay:.4s}
+.section:nth-of-type(2){animation-delay:.5s}
+.brand .logo{display:inline-block;animation:float 4s ease-in-out infinite}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;scroll-behavior:auto!important}.view.animate,.section.animate{animation:none!important}}
+@media(max-width:850px){.sidebar{width:64px;flex-basis:64px}.brand h1,nav a span,.lbl{display:none}.content{padding:16px}.stats{grid-template-columns:1fr}}
 </style></head><body><div class=app>
 <aside class=sidebar id=sidebar>
 <div class=brand><span class=logo>🛡️</span><h1>Kariz panel</h1></div>
 <nav>
-<a data-view=dashboard class=active onclick="view('dashboard')">📊 <span>داشبورد</span></a>
-<a data-view=servers onclick="view('servers')">🖥️ <span>سرورها</span></a>
-<a data-view=tunnels onclick="view('tunnels')">🔐 <span>تونل‌ها</span></a>
+<a data-view=dashboard class=active onclick="view('dashboard')"><i>📊</i> <span>داشبورد</span></a>
+<a data-view=servers onclick="view('servers')"><i>🖥️</i> <span>سرورها</span></a>
+<a data-view=tunnels onclick="view('tunnels')"><i>🔐</i> <span>تونل‌ها</span></a>
 </nav>
 <div class=foot>
-<button class=upd onclick=updatePanel() title="بروزرسانی">🔄 <span class=lbl>بروزرسانی</span></button>
-<button onclick="q('#sidebar').classList.toggle('collapsed')" title="جمع کردن منو">☰ <span class=lbl>جمع کردن</span></button>
-<button onclick="fetch('/logout').then(()=>location.href='/login')" title="خروج">🚪 <span class=lbl>خروج</span></button>
+<button class=upd onclick=updatePanel() title="بروزرسانی"><i>🔄</i> <span class=lbl>بروزرسانی</span></button>
+<button onclick="q('#sidebar').classList.toggle('collapsed')" title="جمع کردن منو"><i>☰</i> <span class=lbl>جمع کردن</span></button>
+<button onclick="fetch('/logout').then(()=>location.href='/login')" title="خروج"><i>🚪</i> <span class=lbl>خروج</span></button>
 </div>
 </aside>
 <main>
@@ -169,8 +185,8 @@ pre{background:#080a0f;padding:14px;border-radius:10px;border:1px solid #202532;
 <div class="view" id=v-tunnels>
 <div class=section><h3>تونل‌ها</h3><div id=tunnels></div>
 <div class=row><input id=tname placeholder="نام تونل"></div>
-<div class=row>entry <select id=tentry></select> exit <select id=texit></select>
-port <input id=tport type=number value=3080> transport <select id=ttrans>
+<div class=row><span class=muted>Entry:</span> <select id=tentry></select> <span class=muted>Exit:</span> <select id=texit></select></div>
+<div class=row><span class=muted>Port:</span> <input id=tport type=number value=3080> <span class=muted>Transport:</span> <select id=ttrans>
 <option>auto</option><option>tcp</option><option>tcpmux</option><option>ws</option><option>wss</option><option>quic</option><option>kcp</option></select></div>
 <div id=fw></div>
 <div class=row><button onclick=addFw()>+ فوروارد</button><button class=btn-accent onclick=addTunnel()>ساخت تونل</button></div></div>
@@ -184,7 +200,7 @@ const esc=s=>String(s??'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt
 let SERVERS=[],TUNNELS=[];
 function out(s){q('#out').textContent=s}
 async function api(p,m,b){let r=await fetch(p,{method:m||'GET',headers:{'Content-Type':'application/json'},body:b?JSON.stringify(b):undefined});if(!r.ok)throw Error(await r.text());return r.json()}
-function view(n){qa('nav a').forEach(a=>a.classList.toggle('active',a.dataset.view===n));qa('.view').forEach(v=>v.style.display=v.id==='v-'+n?'block':'none');q('#page-title').textContent={dashboard:'داشبورد',servers:'سرورها',tunnels:'تونل‌ها'}[n]}
+function view(n){qa('nav a').forEach(a=>a.classList.toggle('active',a.dataset.view===n));qa('.view').forEach(v=>{const show=v.id==='v-'+n;v.style.display=show?'block':'none';if(show&&!matchMedia('(prefers-reduced-motion: reduce)').matches){v.animate([{opacity:0,transform:'translateY(12px)'},{opacity:1,transform:'none'}],{duration:320,easing:'cubic-bezier(.16,1,.3,1)'});v.querySelectorAll('.section').forEach((s,i)=>s.animate([{opacity:0,transform:'translateY(10px)'},{opacity:1,transform:'none'}],{duration:360,delay:i*70,easing:'cubic-bezier(.16,1,.3,1)'}))}});q('#page-title').textContent={dashboard:'داشبورد',servers:'سرورها',tunnels:'تونل‌ها'}[n]}
 function serverCard(x){return `<div class=card>${esc(x.name)} <small class=muted>${esc(x.address||'')} ${esc(x.last_seen||'')}</small> <span class=del onclick="del('servers',${x.id})">✕</span><br><span class=token>token: ${esc(x.token)}</span></div>`}
 function tunnelCard(x){return `<div class=card>${esc(x.name)} ${esc(x.entry)}→${esc(x.exit)} :${x.tunnel_port} ${esc(x.transport)} <span class=del onclick="del('tunnels',${x.id})">✕</span><br><span class=token>${esc(x.forwards||'[]')}</span></div>`}
 async function load(){[SERVERS,TUNNELS]=await Promise.all([api('/api/servers'),api('/api/tunnels')]);

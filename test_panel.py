@@ -110,6 +110,8 @@ try:
 
     s, b = req("/", auth=True)
     assert s == 200 and b"<h1>Kariz panel" in b, "UI failed"
+    assert b"v.animate([{opacity:0,transform:'translateY(12px)'" in b, "view transition missing"
+    assert b"prefers-reduced-motion: reduce" in b, "reduced-motion support missing"
 
     s, _ = req("/api/servers")
     assert s == 401, f"auth gate failed: {s}"

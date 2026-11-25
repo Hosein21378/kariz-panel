@@ -17,8 +17,8 @@ from urllib.parse import urlparse, parse_qs
 
 DB = os.environ.get("KARIZ_PANEL_DB", "/var/lib/kariz-panel/panel.db")
 PORT = int(os.environ.get("KARIZ_PANEL_PORT", "28443"))
-ADMIN_USER = os.environ.get("KARIZ_PANEL_USER", "")
-ADMIN_PASS = os.environ.get("KARIZ_PANEL_PASS", "")
+ADMIN_USER = os.environ.get("KARIZ_PANEL_USER") or os.environ.get("KARIZ_USER", "")
+ADMIN_PASS = os.environ.get("KARIZ_PANEL_PASS") or os.environ.get("KARIZ_PASS", "")
 
 
 def connect():
@@ -244,7 +244,7 @@ body{margin:0;min-height:100vh;font-family:system-ui,-apple-system,'Segoe UI',sa
 <div class=foot>مدیریت تونل‌ها و سرورهای Kariz</div>
 </div>
 <script>
-const q=s=>document.querySelector(s);
+const q=s=>document.querySelector('#'+s);
 async function login(){
  const b=q('b'),e=q('e');e.textContent='';
  if(!q('u').value||!q('p').value){e.textContent='نام کاربری و رمز عبور را وارد کنید';return}
@@ -327,6 +327,7 @@ class H(BaseHTTPRequestHandler):
         data = body.encode() if isinstance(body, str) else body
         self.send_response(code)
         self.send_header("Content-Type", ctype)
+        self.send_header("Cache-Control", "no-store, no-cache, must-revalidate")
         self.send_header("Content-Length", str(len(data)))
         self.end_headers()
         self.wfile.write(data)

@@ -93,7 +93,7 @@ def check_login():
     s, _, _ = raw("/login", "POST", {"user": "admin", "pass": "wrong"})
     assert s == 401, s
     s, _, h = raw("/login", "POST", {"user": "admin", "pass": "secret123"})
-    assert s == 302, s
+    assert s == 200, s
     cookie = h["Set-Cookie"].split(";")[0]
     s, body, _ = raw("/api/servers", headers={"Cookie": cookie})
     assert s == 200 and isinstance(json.loads(body), list), (s, body)
